@@ -6,6 +6,7 @@ const app = express();
 const port = process.env.PORT;
 
 app.use(express.json())
+app.use(errorHandler)
 
 app.use("/api/contacts", require("./routes/contactRoutes"))
 
