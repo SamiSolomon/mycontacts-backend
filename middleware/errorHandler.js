@@ -1,42 +1,35 @@
 const { constants } = require("../constants");
+
 const errorHandler = (err, req, res, next) => {
-  const statusCode = res.statusCode ? res.statusCode : 500;
-  switch (statusCode) {
-    case constants.VALIDATION_ERROR:
-      res.json({
-        title: "Validation Failed",
+    const statusCode = res.statusCode ? res.statusCode : 500;
+    let errorResponse = {
+        title: "Error",
         message: err.message,
-        stackTrace: err.stack,
-      });
-      break;
-    case constants.FORBIDDEN:
-      res.json({
-        title: "Not Found",
-        message: err.message,
-        stackTrace: err.stack,
-      });
-    case constants.UNAUTHORIZED:
-        res.json({
-          title: "Unauthorized",
-          message: err.message,
-          stackTrace: err.stack,
-        });
-    case constants.NOT_FOUND:
-        res.json({
-          title: "Not Found",
-          message: err.message,
-          stackTrace: err.stack,
-        });
-    case constants.SERVER_ERROR:
-            res.json({
-              title: "Server Error",
-              message: err.message,
-              stackTrace: err.stack,
-            });
-      default:
-          console.log("No Error, All good!");
-      break;
-  }
+        stackTrace: process.env.NODE_ENV === "production" ? null : err.stack,
+    };
+
+    switch (statusCode) {
+        case constants.VALIDATION_ERROR:
+            errorResponse.title = "Validation Failed";
+            break;
+        case constants.UNAUTHORIZED:
+            errorResponse.title = "Unauthorized";
+            break;
+        case constants.FORBIDDEN:
+            errorResponse.title = "Forbidden";
+            break;
+        case constants.NOT_FOUND:
+            errorResponse.title = "Not Found";
+            break;
+        case constants.SERVER_ERROR:
+            errorResponse.title = "Server Error";
+            break;
+        default:
+            console.log("No error, all good!");
+            return next();
+    }
+
+    res.status(statusCode).json(errorResponse);
 };
 
 module.exports = errorHandler;
